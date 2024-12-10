@@ -135,7 +135,7 @@ export const columns: ColumnDef<Course>[] = [
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Actions</DropdownMenuLabel>
 							<DropdownMenuItem>
-								<Link href={`/faculty/courses/${course.id}`}>View Course</Link>
+								<Link href={`/app/faculty/courses/${course.id}`}>View Course</Link>
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DeleteCourse id={course.id} />
@@ -359,7 +359,7 @@ export default function CourseTable() {
 			{/* pagination */}
 			<div className="flex items-center justify-end space-x-2 py-4">
 				<div className="flex-1 text-sm text-muted-foreground">
-					{page} of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
+					{page}+1 of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
 				</div>
 				<div className="space-x-2">
 					<Button

@@ -43,6 +43,8 @@ import * as React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import CreateCourseForm from "./course-form";
+import { TbUserEdit } from "react-icons/tb";
+import { UpdateCourse } from "./update-course";
 
 // import { UpdateCourse } from "./update-course";
 
@@ -74,13 +76,6 @@ export const columns: ColumnDef<Course>[] = [
 			<div className="mx-4">{row.getValue("course_title")}</div>
 		),
 	},
-	//   {
-	//     accessorKey: "course_description",
-	//     header: () => <div className="mx-4">Course Description</div>,
-	//     cell: ({ row }) => (
-	//       <div className="mx-4">{row.getValue("course_description")}</div>
-	//     ),
-	//   },
 	{
 		accessorKey: "course_credits",
 		header: () => <div className="mx-4">Credits</div>,
@@ -122,6 +117,15 @@ export const columns: ColumnDef<Course>[] = [
 			const course = row.original;
 			return (
 				<>
+					{/* This is a reuseable component */}
+						<UpdateCourse id={course?.id}>
+							<Button
+								size={"icon"}
+								variant={"ghost"}
+							>
+								<TbUserEdit />
+							</Button>
+						</UpdateCourse>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -140,7 +144,6 @@ export const columns: ColumnDef<Course>[] = [
 							<DropdownMenuSeparator />
 							<DeleteCourse id={course.id} />
 							<DropdownMenuSeparator />
-							{/* <UpdateCourse courseId={course.id} /> */}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</>
@@ -148,44 +151,6 @@ export const columns: ColumnDef<Course>[] = [
 		},
 	},
 ];
-
-export function UpdateCourse({ courseId }: { courseId: number | string }) {
-	const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
-	const { data: course } = useGetCourseById(courseId);
-	const { mutateAsync: update } = useUpdateCourse();
-	// console.log("courseId", courseId);
-	// console.log("course to update", course);
-
-	// Need To Debug
-	const handleUpdate = async (updatedData: unknown) => {
-		console.log("updatedData", updatedData);
-		const res = await handleResponse(
-			() => update({ id: courseId, data: updatedData }),
-			200
-		);
-
-		console.log("res", res);
-		// const res = await update({ id: courseId, ...data });
-		if (res.status) {
-			toast("Course Updated!", {
-				description: "The course has been updated successfully.",
-			});
-			setIsCreateCourseOpen(false);
-		} else {
-			toast.error("Error updating course");
-		}
-	};
-
-	return (
-		<CreateCourseForm
-			initialData={course?.data.data}
-			open={isCreateCourseOpen}
-			setOpen={setIsCreateCourseOpen}
-			onSubmit={handleUpdate}
-		/>
-	);
-}
-
 const DeleteCourse: React.FC<{ id: number }> = ({ id }) => {
 	const { mutateAsync: Delete, isPending: isDeleting } = useDeleteCourse();
 
@@ -230,7 +195,6 @@ export default function CourseTable() {
 	const { data, isLoading } = useGetCourses({
 		page,
 	});
-	console.log(data);
 
 	const table = useReactTable({
 		data: React.useMemo(() => data?.data.data || [], [data]),
