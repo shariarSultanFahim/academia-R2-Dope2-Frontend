@@ -15,7 +15,6 @@ export default function CoursesPage() {
         <CreateCourse />
       </div>
       <Separator />
-
       <div className="px-9">
         <CourseList />
       </div>
