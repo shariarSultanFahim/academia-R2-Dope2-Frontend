@@ -9,7 +9,13 @@ export default function Section() {
   const { data } = useGetSectionById(params.id);
 
   const details = data?.data?.data;
-  console.log("details", details);
+
+  // console.log(data?.data);
+  // const materials = data?.data?.course_section_materials;
+  // const assignments = data?.data?.course_section_assignments;
+  // console.log("materials", materials);
+  // console.log("assignments", assignments);
+
   // console.log(params);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 py-6">
