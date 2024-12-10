@@ -31,10 +31,10 @@ import { DotsHorizontalIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CiEdit } from "react-icons/ci";
 import { toast } from "sonner";
-import { DeleteCourse } from '@/app/app/faculty/courses/components/delete-course';
 import { useGetSections } from '@/lib/actions/courses/section/sections.get';
 import { TbUserEdit } from 'react-icons/tb';
 import { UpdateSection } from './update-section';
+import Link from 'next/link';
 
 export interface SectionListProps {
 		id: number;
@@ -98,6 +98,10 @@ export const columns: ColumnDef<SectionListProps>[] = [
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Actions</DropdownMenuLabel>
+							<DropdownMenuSeparator />
+							<Link href={`/app/admin/section/${section.id}`}>
+								<DropdownMenuItem>View Section</DropdownMenuItem>
+							</Link>
 							<DropdownMenuSeparator />
 							<DeleteSection id={section.id} />
 							<DropdownMenuSeparator />
