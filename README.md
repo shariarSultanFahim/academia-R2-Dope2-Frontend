@@ -54,17 +54,19 @@ bash
 git clone [https://github.com/shariarSultanFahim/academia-R2-Dope2-Frontend.git]```
 
 ```
-2. Install dependencies
 
+2. Install dependencies
+```
 bash
 npm install
 ```
+
 3. Run the development server
+
 ```
 bash
 npm run dev
 ```
-
 
 ## Team Members
 - [Tam11a]
