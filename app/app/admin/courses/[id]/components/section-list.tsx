@@ -26,13 +26,15 @@ import {
 import { useGetCourses } from "@/lib/actions/courses/course.get";
 import { useDeleteSection } from "@/lib/actions/courses/section/delete-section";
 import handleResponse from "@/lib/response.utils";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DotsHorizontalIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CiEdit } from "react-icons/ci";
 import { toast } from "sonner";
 import { DeleteCourse } from '@/app/app/faculty/courses/components/delete-course';
-import { useGetSections } from '@/lib/actions/courses/section/sections.get-id';
+import { useGetSections } from '@/lib/actions/courses/section/sections.get';
+import { TbUserEdit } from 'react-icons/tb';
+import { UpdateSection } from './update-section';
 
 export interface SectionListProps {
 		id: number;
@@ -48,15 +50,15 @@ export interface SectionListProps {
 
 export const columns: ColumnDef<SectionListProps>[] = [
 	{
-		accessorKey: "course_id",
-		header: () => <div className="mx-4">Course Code</div>,
+		accessorKey: "id",
+		header: () => <div className="mx-4">Section Code</div>,
 		cell: ({ row }) => (
-			<div className="mx-4">{row.getValue("course_id")}</div>
+			<div className="mx-4">{row.getValue("id")}</div>
 		),
 	},
 	{
 		accessorKey: "section_title",
-		header: () => <div className="mx-4">Course Title</div>,
+		header: () => <div className="mx-4">Section Title</div>,
 		cell: ({ row }) => (
 			<div className="mx-4">{row.getValue("section_title")}</div>
 		),
@@ -75,6 +77,15 @@ export const columns: ColumnDef<SectionListProps>[] = [
 			const section = row.original;
 			return (
 				<>
+				{/* This is a reuseable component */}
+				<UpdateSection id={section?.id}>
+						<Button
+							size={"icon"}
+							variant={"ghost"}
+						>
+							<TbUserEdit />
+						</Button>
+					</UpdateSection>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -88,7 +99,7 @@ export const columns: ColumnDef<SectionListProps>[] = [
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Actions</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<DeleteCourse id={section.id} />
+							<DeleteSection id={section.id} />
 							<DropdownMenuSeparator />
 							{/* <UpdateCourse courseId={course.id} /> */}
 						</DropdownMenuContent>
@@ -98,43 +109,6 @@ export const columns: ColumnDef<SectionListProps>[] = [
 		},
 	},
 ];
-
-export function UpdateSection({ sectionId }: { sectionId: number | string }) {
-	const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
-	const { data: section } = useGetSectionById(sectionId);
-	// const { mutateAsync: update } = useUpdateCourse();
-	// console.log("courseId", courseId);
-	// console.log("course to update", course);
-
-	// Need To Debug
-	// const handleUpdate = async (updatedData: unknown) => {
-	// 	console.log("updatedData", updatedData);
-	// 	const res = await handleResponse(
-	// 		() => update({ id: courseId, data: updatedData }),
-	// 		200
-	// 	);
-
-	// 	console.log("res", res);
-	// 	// const res = await update({ id: courseId, ...data });
-	// 	if (res.status) {
-	// 		toast("Course Updated!", {
-	// 			description: "The course has been updated successfully.",
-	// 		});
-	// 		setIsCreateCourseOpen(false);
-	// 	} else {
-	// 		toast.error("Error updating course");
-	// 	}
-	// };
-
-	// return (
-	// 	<CreateSectionForm
-	// 		initialData={course?.data.data}
-	// 		open={isCreateCourseOpen}
-	// 		setOpen={setIsCreateCourseOpen}
-	// 		onSubmit={handleUpdate}
-	// 	/>
-	// );
-}
 
 const DeleteSection: React.FC<{ id: number }> = ({ id }) => {
 	const { mutateAsync: Delete, isPending: isDeleting } = useDeleteSection();
@@ -195,7 +169,6 @@ export default function SectionTable({ course_id }: SectionListProps) {
 		},
 	});
 
-	console.log(table.getRowModel().rows)
 
 	return (
 		<div className="w-full max-w-[85vw] lg:max-w-[70vw] mx-auto relative">
@@ -309,7 +282,7 @@ export default function SectionTable({ course_id }: SectionListProps) {
 			{/* pagination */}
 			<div className="flex items-center justify-end space-x-2 py-4">
 				<div className="flex-1 text-sm text-muted-foreground">
-					{page} of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
+					{page+1} of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
 				</div>
 				<div className="space-x-2">
 					<Button
