@@ -38,11 +38,12 @@ A comprehensive university management system built with modern web technologies,
 - Server Actions
 
 ## Project Structure
+```
 ├── app/
 │ ├── admin/ # Administrative interface
 │ ├── faculty/ # Faculty interface
 │ ├── student/ # Student interface
-
+```
 
 ## Getting Started
 
