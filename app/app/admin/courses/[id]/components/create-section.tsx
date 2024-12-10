@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -10,6 +9,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
 	Sheet,
 	SheetClose,
@@ -19,54 +19,86 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { useCreateSection } from "@/lib/actions/courses/section/create-section";
+import handleResponse from "@/lib/response.utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const CreateSectionSchema = z.object({
+    course_id:z.number(),
 	section_title: z.string().min(1, { message: "Section title is required." }),
 	section_description: z.string().optional(),
-	section_total_seats: z.number().min(1, {
-		message: "Section total seats must be 1 or greater.",
-	}),
+	section_total_seats: z.number().optional().default(0),
 });
 
-type SectionFormValues = z.infer<typeof CreateSectionSchema>;
+type CourseFormValues = z.infer<typeof CreateSectionSchema>;
 
-interface CreateSectionProps {
-	open: boolean;
-	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	initialData?: SectionFormValues;
-	onSubmit?: (data: SectionFormValues) => void;
+interface CourseSectionParams {
+    course_id?: number;
 }
 
-export default function CreateSection({
-	open,
-	setOpen,
-	initialData = {
-		section_title: "",
-		section_description: "",
-		section_total_seats: 0,
-	},
-}: CreateSectionProps) {
-	const form = useForm<SectionFormValues>({
+export default function CreateSection({course_id}: CourseSectionParams) {
+	const [open, setOpen] = useState(false);
+	const { mutateAsync: create } = useCreateSection();
+
+	const form = useForm<CourseFormValues>({
 		resolver: zodResolver(CreateSectionSchema),
-		defaultValues: initialData,
+		defaultValues: {
+			course_id,
+            section_title: "",
+            section_description: "",
+            section_total_seats: 0,
+		},
 		mode: "onChange",
 	});
 
-	const handleSubmit = async (data: SectionFormValues) => {
-		form.clearErrors(); // Clear previous errors
-		console.log("Form Data:", data); // Debugging purposes
-		setOpen(false); // Close the sheet
-	};
+	async function handleSubmit(data: CourseFormValues) {
+		form.clearErrors();
+		console.log(data);
+		const res = await handleResponse(() => create(data), [201]);
+		if (res.status) {
+			toast("Added!", {
+				description: `Section has been created successfully.`,
+			});
+			form.reset();
+			setOpen(false);
+		} else {
+			if (typeof res.data === "object") {
+				Object.entries(res.data).forEach(([key, value]) => {
+					form.setError(key as keyof CourseFormValues, {
+						type: "validate",
+						message: value as string,
+					});
+				});
+				toast("Error!", {
+					description: `There was an error creating section. Please try again.`,
+					action: {
+						label: "Retry",
+						onClick: () => handleSubmit(data),
+					},
+				});
+			} else {
+				toast("Error!", {
+					description: res.message,
+					action: {
+						label: "Retry",
+						onClick: () => handleSubmit(data),
+					},
+				});
+			}
+		}
+	}
 
 	return (
 		<Sheet
 			open={open}
 			onOpenChange={(o) => setOpen(o)}
 		>
-			<Button onClick={() => setOpen(true)}>Add New Section</Button>
+			<Button onClick={() => setOpen(true)}>Add New Course</Button>
 			<SheetContent className="max-h-screen overflow-y-auto">
 				<SheetHeader>
 					<SheetTitle>Create Section</SheetTitle>
