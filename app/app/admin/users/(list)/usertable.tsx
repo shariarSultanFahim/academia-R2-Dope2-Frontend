@@ -119,7 +119,6 @@ export const columns: ColumnDef<User>[] = [
 			return (
 				<div className="mx-4">
 					<Badge
-						variant={"booked"}
 						title={role as string}
 					>
 						{role as string}
