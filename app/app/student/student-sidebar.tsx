@@ -8,7 +8,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, LogOut, Settings } from "lucide-react";
+import { GraduationCap, Home, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 
 // Menu items.
@@ -17,6 +17,11 @@ const items = [
 		title: "Home",
 		url: "/app/student",
 		icon: Home,
+	},
+	{
+		title:"Courses",
+		url:"/app/student/courses",
+		icon:GraduationCap
 	},
 	{
 		title: "Settings",

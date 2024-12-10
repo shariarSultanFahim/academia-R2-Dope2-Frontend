@@ -37,3 +37,17 @@ A comprehensive university management system built with modern web technologies,
 - Modern UI Components
 - Server Actions
 
+## Project Structure
+├── app/
+│ ├── admin/ # Administrative interface
+│ ├── faculty/ # Faculty interface
+│ ├── student/ # Student interface
+
+
+## Team Members
+- [Tam11a]
+- [ShariarSultanFahim]
+- [ShahrinaSabrin]
+
+---
+Built with 💻 by R2-Dope2
