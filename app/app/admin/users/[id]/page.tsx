@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetUserById } from "@/lib/actions/users/user-by-id";
+import moment from "moment";
 import { useParams } from "next/navigation";
 
 export default function UserProfile() {
@@ -51,7 +52,7 @@ export default function UserProfile() {
             <strong>Bio:</strong> {profile?.bio || "N/A"}
           </p>
           <p>
-            <strong>Date of Birth:</strong> {profile?.dob || "N/A"}
+            <strong>Date of Birth:</strong> {moment(profile?.dob).format("ll")}
           </p>
         </CardContent>
       </Card>
@@ -91,11 +92,11 @@ export default function UserProfile() {
         <CardContent>
           <p>
             <strong>Account Created At:</strong>{" "}
-            {new Date(user?.created_at).toLocaleString()}
+            {moment(user?.created_at).format("lll")}
           </p>
           <p>
             <strong>Account Updated At:</strong>{" "}
-            {new Date(user?.updated_at).toLocaleString()}
+            {moment(user?.updated_at).format("lll")}
           </p>
         </CardContent>
       </Card>
