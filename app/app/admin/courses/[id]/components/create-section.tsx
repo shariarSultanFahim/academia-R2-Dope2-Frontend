@@ -98,7 +98,7 @@ export default function CreateSection({course_id}: CourseSectionParams) {
 			open={open}
 			onOpenChange={(o) => setOpen(o)}
 		>
-			<Button onClick={() => setOpen(true)}>Add New Course</Button>
+			<Button onClick={() => setOpen(true)}>Add New Section</Button>
 			<SheetContent className="max-h-screen overflow-y-auto">
 				<SheetHeader>
 					<SheetTitle>Create Section</SheetTitle>
