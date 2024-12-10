@@ -82,7 +82,7 @@ export const columns: ColumnDef<User>[] = [
 	{
 		accessorKey: "username",
 		header: () => <div className="mx-4">Username</div>,
-		cell: ({ row }) => <div className="mx-4">{row.getValue("username")}</div>,
+		cell: ({ row }) => <Link className="mx-4 text-primary underline underline-offset-1" href={`/app/admin/users/${row.original.id}`}>{row.getValue("username")}</Link>,
 	},
 	{
 		accessorKey: "profile.first_name",
@@ -189,7 +189,7 @@ export const columns: ColumnDef<User>[] = [
 					</UpdateUser>
 
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
+						<DropdownMenuTrigger  asChild>
 							<Button
 								variant="ghost"
 								className="h-8 w-8 p-0"
