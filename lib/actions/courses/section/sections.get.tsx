@@ -3,7 +3,7 @@ import instance from "../..";
 
 interface GetSectionsParams {
   course_id: number | string;
-	page?: number;
+  page?: number;
 }
 
 export const useGetSections = (params?: GetSectionsParams) => {

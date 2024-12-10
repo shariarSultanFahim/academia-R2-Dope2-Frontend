@@ -144,7 +144,7 @@ const DeleteSection: React.FC<{ id: number }> = ({ id }) => {
   );
 };
 
-export default function SectionTable({ course_id }: SectionListProps) {
+export default function SectionTable({ course_id }: {course_id: number}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [page, setPage] = React.useState(0);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(

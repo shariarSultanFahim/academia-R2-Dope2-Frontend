@@ -9,6 +9,12 @@ export default function CoursesLayout({
 	params,
 }: Readonly<{ children: React.ReactNode; params: { id: number } }>) {
 	const { data } = useGetCourseById(params.id);
+
+	
+
+
+	
+
 	return !data ? (
 		<Loading />
 	) : (

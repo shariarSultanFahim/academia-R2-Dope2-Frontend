@@ -4,7 +4,6 @@ import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
@@ -20,12 +19,7 @@ import {
 	TableLoading,
 	TableRow,
 } from "@/components/ui/table";
-import { useGetCourseById } from "@/lib/actions/courses/course-by-id";
-import { useGetCourses } from "@/lib/actions/courses/course.get";
-import { useDeleteCourse } from "@/lib/actions/courses/delete-course";
-import { useUpdateCourse } from "@/lib/actions/courses/update-course";
 import handleResponse from "@/lib/response.utils";
-import { DotsHorizontalIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -37,81 +31,103 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import moment from "moment";
-import Link from "next/link";
 import * as React from "react";
-import { useState } from "react";
 import { toast } from "sonner";
-import CreateCourseForm from "./course-form";
+import { TbUserEdit } from "react-icons/tb";
+import { useEnrollToCourse } from "@/lib/actions/courses/enroll-course";
+import { useValidate } from "@/lib/actions/auth/validate.get";
+import { useGetSections } from "@/lib/actions/courses/section/sections.get";
 import { useParams } from "next/navigation";
-
+import { MixerHorizontalIcon } from "@radix-ui/react-icons";
 // import { UpdateCourse } from "./update-course";
 
-export interface Course {
+export interface Sections {
 	id: number;
-	course_code: string;
-	course_title: string;
-	course_category: string;
-	course_description: string;
-	course_credits: number;
-	start_date: string;
-	end_date: string;
-	created_at: string;
-	updated_at: string;
+	course_id: number;
+	section_title: string;
+	section_total_seats: number;
+    _count:{
+        course_section_student_enrollments:number;
+    }
 }
 
-export const columns: ColumnDef<Course>[] = [
+const EnrollCourseButton: React.FC<{sectionId: number}> = ( {sectionId}) => {
+    const {mutateAsync:create} = useEnrollToCourse();
+    const {data: user} = useValidate();
+
+
+	async function onSubmit() {
+		// Handle the delete response
+		const res = await handleResponse(() => create({
+            section_id: sectionId,
+            user_id: user?.data?.id,
+            enrollment_status: "PENDING"
+          }), 201);
+		if (res.status) {
+			toast("Success!", {
+				description: `Course has been joined successfully.`,
+				closeButton: true,
+			});
+		} else {
+			toast("Error!", {
+				description: res.message,
+				action: {
+					label: "Retry",
+					onClick: () => onSubmit(),
+				},
+			});
+		}
+	}
+
+	return (
+		<Button
+			size={"icon"}
+			variant={"ghost"}
+            onClick={onSubmit}
+		>
+			<TbUserEdit />
+		</Button>
+	);
+};
+
+export const columns: ColumnDef<Sections>[] = [
 	{
-		accessorKey: "course_code",
-		header: () => <div className="mx-4">Course Code</div>,
+		accessorKey: "id",
+		header: () => <div className="mx-4">Section ID</div>,
 		cell: ({ row }) => (
-			<div className="mx-4">{row.getValue("course_code")}</div>
+			<div className="mx-4">{row.getValue("id")}</div>
 		),
 	},
 	{
-		accessorKey: "course_title",
-		header: () => <div className="mx-4">Course Title</div>,
+		accessorKey: "course_id",
+		header: () => <div className="mx-4">Course ID</div>,
 		cell: ({ row }) => (
-			<div className="mx-4">{row.getValue("course_title")}</div>
+			<div className="mx-4">{row.getValue("course_id")}</div>
 		),
 	},
-	//   {
-	//     accessorKey: "course_description",
-	//     header: () => <div className="mx-4">Course Description</div>,
-	//     cell: ({ row }) => (
-	//       <div className="mx-4">{row.getValue("course_description")}</div>
-	//     ),
-	//   },
 	{
-		accessorKey: "course_credits",
-		header: () => <div className="mx-4">Credits</div>,
+		accessorKey: "section_title",
+		header: () => <div className="mx-4">Section Title</div>,
 		cell: ({ row }) => (
-			<div className="mx-4">{row.getValue("course_credits")}</div>
+			<div className="mx-4">{row.getValue("section_title")}</div>
 		),
 	},
 
 	{
-		accessorKey: "course_start_date",
-		header: () => <div className="mx-4">Start Date</div>,
+		accessorKey: "section_total_seats",
+		header: () => <div className="mx-4">Total Seats</div>,
 		cell: ({ row }) => {
-			const startDate = moment(row.getValue("course_start_date"));
 			return (
-				<div className="mx-4">
-					{startDate.isValid() ? startDate.format("DD-MM-YYYY") : ""}
-				</div>
+				<div className="mx-4">{row.getValue("section_total_seats")}</div>
 			);
 		},
 	},
-
 	{
-		accessorKey: "course_end_date",
-		header: () => <div className="mx-4">End Date</div>,
+		accessorKey: "section_seats_left",
+		header: () => <div className="mx-4">Seats Left</div>,
 		cell: ({ row }) => {
-			const endDate = moment(row.getValue("course_end_date"));
 			return (
-				<div className="mx-4">
-					{endDate.isValid() ? endDate.format("DD-MM-YYYY") : ""}
-				</div>
+				<div className="mx-4">{(row.original.section_total_seats - row.original._count.course_section_student_enrollments)}</div>
 			);
 		},
 	},
@@ -120,104 +136,19 @@ export const columns: ColumnDef<Course>[] = [
 		id: "actions",
 		enableHiding: false,
 		cell: ({ row }) => {
-			const course = row.original;
+            const section = row.original;
 			return (
 				<>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								className="h-8 w-8 p-0"
-							>
-								<span className="sr-only">Open menu</span>
-								<DotsHorizontalIcon className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
-							<DropdownMenuItem>
-								<Link href={`/app/faculty/courses/${course.id}`}>View Course</Link>
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DeleteCourse id={course.id} />
-							<DropdownMenuSeparator />
-							{/* <UpdateCourse courseId={course.id} /> */}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					{/* This is a reuseable component */}
+						<EnrollCourseButton sectionId = {section.id}/>
+							
 				</>
 			);
 		},
 	},
 ];
 
-export function UpdateCourse({ courseId }: { courseId: number | string }) {
-	const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
-	const { data: course } = useGetCourseById(courseId);
-	const { mutateAsync: update } = useUpdateCourse();
-	// console.log("courseId", courseId);
-	// console.log("course to update", course);
 
-	// Need To Debug
-	const handleUpdate = async (updatedData: unknown) => {
-		console.log("updatedData", updatedData);
-		const res = await handleResponse(
-			() => update({ id: courseId, data: updatedData }),
-			200
-		);
-		console.log("res", res);
-		// const res = await update({ id: courseId, ...data });
-		if (res.status) {
-			toast("Course Updated!", {
-				description: "The course has been updated successfully.",
-			});
-			setIsCreateCourseOpen(false);
-		} else {
-			toast.error("Error updating course");
-		}
-	};
-
-	return (
-		<CreateCourseForm
-			initialData={course?.data.data}
-			open={isCreateCourseOpen}
-			setOpen={setIsCreateCourseOpen}
-			onSubmit={handleUpdate}
-		/>
-	);
-}
-
-const DeleteCourse: React.FC<{ id: number }> = ({ id }) => {
-	const { mutateAsync: Delete, isPending: isDeleting } = useDeleteCourse();
-
-	async function onDelete(id: number) {
-		// Handle the delete response
-		const res = await handleResponse(() => Delete(id), 204);
-		if (res.status) {
-			toast("Deleted!", {
-				description: `Course has been deleted successfully.`,
-				closeButton: true,
-			});
-		} else {
-			toast("Error!", {
-				description: res.message,
-				action: {
-					label: "Retry",
-					onClick: () => onDelete(id),
-				},
-			});
-		}
-	}
-
-	return (
-		<DropdownMenuItem
-			className="bg-red-500 focus:bg-red-400 text-white focus:text-white"
-			onClick={() => onDelete(id)}
-			disabled={isDeleting}
-		>
-			Delete Course
-		</DropdownMenuItem>
-	);
-};
 
 export default function CourseTable() {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -225,17 +156,14 @@ export default function CourseTable() {
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
 	);
-
-	const {id} = useParams<{id: string }>();
-
+    const {id} = useParams<{id: string }>();
 	const [columnVisibility, setColumnVisibility] =
-		React.useState<VisibilityState>({});
-	const { data, isLoading } = useGetCourses({
-		course_id:id,
-		page,
-		
-	});
+	React.useState<VisibilityState>({});
 
+	const { data, isLoading } = useGetSections({
+        course_id:id,
+		page,
+	});
 
 	const table = useReactTable({
 		data: React.useMemo(() => data?.data.data || [], [data]),
@@ -257,12 +185,12 @@ export default function CourseTable() {
 		<div className="w-full max-w-[85vw] lg:max-w-[70vw] mx-auto relative">
 			<div className="flex items-center flex-row gap-2 py-4">
 				<Input
-					placeholder="Filter course name..."
+					placeholder="Filter section name..."
 					value={
-						(table.getColumn("course_title")?.getFilterValue() as string) ?? ""
+						(table.getColumn("section_title")?.getFilterValue() as string) ?? ""
 					}
 					onChange={(event) =>
-						table.getColumn("course_title")?.setFilterValue(event.target.value)
+						table.getColumn("section_title")?.setFilterValue(event.target.value)
 					}
 					className="max-w-sm"
 				/>
@@ -365,7 +293,7 @@ export default function CourseTable() {
 			{/* pagination */}
 			<div className="flex items-center justify-end space-x-2 py-4">
 				<div className="flex-1 text-sm text-muted-foreground">
-					{page}+1 of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
+					{page} of {Math.ceil((data?.data?.data?.count || 1) / 8)} page(s).
 				</div>
 				<div className="space-x-2">
 					<Button
