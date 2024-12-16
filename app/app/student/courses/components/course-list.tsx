@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { useGetCourseById } from "@/lib/actions/courses/course-by-id";
 import { useGetCourses } from "@/lib/actions/courses/course.get";
-import { useDeleteCourse } from "@/lib/actions/courses/delete-course";
 import { useUpdateCourse } from "@/lib/actions/courses/update-course";
 import handleResponse from "@/lib/response.utils";
 import { DotsHorizontalIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
@@ -138,7 +137,6 @@ export const columns: ColumnDef<Course>[] = [
 								<Link href={`/app/student/courses/${course.id}`}>View Course</Link>
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
-							<DeleteCourse id={course.id} />
 							<DropdownMenuSeparator />
 							{/* <UpdateCourse courseId={course.id} /> */}
 						</DropdownMenuContent>
@@ -185,38 +183,6 @@ export function UpdateCourse({ courseId }: { courseId: number | string }) {
 	);
 }
 
-const DeleteCourse: React.FC<{ id: number }> = ({ id }) => {
-	const { mutateAsync: Delete, isPending: isDeleting } = useDeleteCourse();
-
-	async function onDelete(id: number) {
-		// Handle the delete response
-		const res = await handleResponse(() => Delete(id), 204);
-		if (res.status) {
-			toast("Deleted!", {
-				description: `Course has been deleted successfully.`,
-				closeButton: true,
-			});
-		} else {
-			toast("Error!", {
-				description: res.message,
-				action: {
-					label: "Retry",
-					onClick: () => onDelete(id),
-				},
-			});
-		}
-	}
-
-	return (
-		<DropdownMenuItem
-			className="bg-red-500 focus:bg-red-400 text-white focus:text-white"
-			onClick={() => onDelete(id)}
-			disabled={isDeleting}
-		>
-			Delete Course
-		</DropdownMenuItem>
-	);
-};
 
 export default function CourseTable() {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
